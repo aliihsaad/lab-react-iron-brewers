@@ -1,27 +1,46 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Search from "../components/Search";
-import beersJSON from "./../assets/beers.json";
 
-
+const API_URL = "https://beers-api.edu.ironhack.com";
 
 function AllBeersPage() {
-  // Mock initial state, to be replaced by data from the API. Once you retrieve the list of beers from the Beers API store it in this state variable.
-  const [beers, setBeers] = useState(beersJSON);
+  // TASK 0: Initial state for beers
+  const [beers, setBeers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("")
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // TASK 1: Set up an effect hook to make a request to the Beers API
+  useEffect(() => {
+    const fetchBeers = async () => {
+      try {
+        let response;
+
+        if (searchQuery === "") {
+          response = await axios.get(`${API_URL}/beers`);
+        } else {
+          response = await axios.get(`${API_URL}/beers/search?q=${searchQuery}`);
+        }
+        setBeers(response.data);
+
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchBeers();
+
+  }, [searchQuery]);
 
 
-
-  // TASKS:
-  // 1. Set up an effect hook to make a request to the Beers API and get a list with all the beers.
-  // 2. Use axios to make a HTTP request.
-  // 3. Use the response data from the Beers API to update the state variable.
-
-
-
-  // The logic and the structure for the page showing the list of beers. You can leave this as it is for now.
   return (
     <>
-      <Search />
+      {/* Pass searchQuery and handleSearch as props to Search */}
+      {/* Search renders the input, but AllBeersPage owns the state */}
+      <Search searchQuery={searchQuery} handleSearch={handleSearch} />
 
       <div className="d-inline-flex flex-wrap justify-content-center align-items-center w-100 p-4">
         {beers &&
@@ -55,3 +74,4 @@ function AllBeersPage() {
 }
 
 export default AllBeersPage;
+
